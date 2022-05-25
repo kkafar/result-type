@@ -8,6 +8,16 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class Result<OkT, ErrT> {
+
+  public static final String ERR_OK_ACCESS_WHEN_ERR =
+      "Attempt to access ok value on error result";
+
+  public static final String ERR_ERR_ACCESS_WHEN_OK =
+      "Attempt to access error value on ok result";
+
+  public static final String ERR_DIRECT_ACCESS_WHEN_NULL =
+      "Attempt to access null value via safe method. Consider using getOkOrNull / getErrOrNull.";
+
   @Nullable
   private final OkT okValue;
 
@@ -57,7 +67,7 @@ public class Result<OkT, ErrT> {
     if (isOk()) {
       return okValue;
     }
-    throw new IllegalStateException("Attempt to access ok value on error result!");
+    throw new IllegalStateException(ERR_OK_ACCESS_WHEN_ERR);
   }
 
   @Nullable
@@ -65,7 +75,7 @@ public class Result<OkT, ErrT> {
     if (isErr()) {
       return errValue;
     }
-    throw new IllegalStateException("Attempt to access error value on ok result!");
+    throw new IllegalStateException(ERR_ERR_ACCESS_WHEN_OK);
   }
 
   @Contract("!null -> !null; null -> _")
@@ -85,11 +95,10 @@ public class Result<OkT, ErrT> {
    */
   @NotNull
   public OkT getOk() {
-    if (isOk() && okValue != null) {
-      return okValue;
-    } else {
-      throw new IllegalStateException("Attempt to access ok value on error result!");
+    if (isOk()) {
+      return okValue != null ? okValue : (throw new IllegalStateException(ERR_DIRECT_ACCESS_WHEN_NULL));
     }
+    throw new IllegalStateException(ERR_OK_ACCESS_WHEN_ERR);
   }
 
   /**
@@ -99,10 +108,10 @@ public class Result<OkT, ErrT> {
    */
   @NotNull
   public ErrT getErr() {
-    if (isErr() && errValue != null) {
-      return errValue;
+    if (isErr()) {
+      return errValue != null ? errValue : throw new IllegalStateException(ERR_DIRECT_ACCESS_WHEN_NULL);
     } else {
-      throw new IllegalStateException("Attempt to access error value on ok result!");
+      throw new IllegalStateException(ERR_ERR_ACCESS_WHEN_OK);
     }
   }
 
