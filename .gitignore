@@ -7,3 +7,9 @@ build
 # IDE specific
 .vscode/
 .idea/
+
+# Marked as local
+local.*
+
+# local development environment
+.envrc

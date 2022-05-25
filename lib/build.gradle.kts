@@ -1,5 +1,31 @@
 plugins {
     `java-library`
+    `maven-publish`
+}
+
+group = "com.kkafara.rt"
+version = "1.0.1"
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/kkafar/result-type")
+            println(project.findProperty("gpr.user"))
+            println(System.getenv("GITHUB_USERNAME"))
+            credentials {
+                username = (project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USERNAME"))
+                password = (project.findProperty("gpr.access_token") as String? ?: System.getenv("GITHUB_TOKEN"))
+            }
+        }
+    }
+    publications {
+        register<MavenPublication>("gpr") {
+            groupId = "com.kkafara.rt"
+            artifactId = "result-type"
+            from(components["java"])
+        }
+    }
 }
 
 repositories {
@@ -8,8 +34,6 @@ repositories {
 
 dependencies {
     testImplementation("junit:junit:4.13.2")
-
-    api("org.apache.commons:commons-math3:3.6.1")
 
     implementation("com.google.guava:guava:30.1.1-jre")
 
