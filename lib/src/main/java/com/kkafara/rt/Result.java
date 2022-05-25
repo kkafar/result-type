@@ -5,20 +5,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class Result<OkT, ErrT> {
   @Nullable
   private final OkT okValue;
 
   @Nullable
-  private final ErrT errorValue;
+  private final ErrT errValue;
 
   @NotNull
   private final Type type;
 
   private Result(@Nullable OkT okValue, @Nullable ErrT errorValue, @NotNull Type type) {
     this.okValue = okValue;
-    this.errorValue = errorValue;
+    this.errValue = errorValue;
     this.type = type;
   }
 
@@ -62,7 +63,7 @@ public class Result<OkT, ErrT> {
   @Nullable
   public ErrT getErrOrNull() {
     if (isErr()) {
-      return errorValue;
+      return errValue;
     }
     throw new IllegalStateException("Attempt to access error value on ok result!");
   }
@@ -74,7 +75,7 @@ public class Result<OkT, ErrT> {
 
   @Contract("!null -> !null; null -> _")
   public ErrT getErrOrDefault(@Nullable final ErrT value) {
-    return errorValue != null ? errorValue : value;
+    return errValue != null ? errValue : value;
   }
 
   /**
@@ -98,8 +99,8 @@ public class Result<OkT, ErrT> {
    */
   @NotNull
   public ErrT getErr() {
-    if (isErr() && errorValue != null) {
-      return errorValue;
+    if (isErr() && errValue != null) {
+      return errValue;
     } else {
       throw new IllegalStateException("Attempt to access error value on ok result!");
     }
@@ -115,20 +116,41 @@ public class Result<OkT, ErrT> {
     return Optional.ofNullable(getErrOrNull());
   }
 
+  public void ifOkOrElse(Consumer<OkT> okAction, Consumer<ErrT> errAction) {
+    if (isOk()) {
+      okAction.accept(okValue);
+    } else {
+      errAction.accept(errValue);
+    }
+  }
+
+  public void ifOk(Consumer<OkT> action) {
+    if (isOk()) {
+      action.accept(okValue);
+    }
+  }
+
+  public void ifErr(Consumer<ErrT> action) {
+    if (isErr()) {
+      action.accept(errValue);
+    }
+  }
+
+
   public boolean isOkValueNull() {
     return okValue == null;
   }
 
   public boolean isErrValueNull() {
-    return errorValue == null;
+    return errValue == null;
   }
 
   public boolean isEmpty() {
-    return errorValue == null && okValue == null;
+    return errValue == null && okValue == null;
   }
 
   public boolean isPresent() {
-    return errorValue != null || okValue != null;
+    return errValue != null || okValue != null;
   }
 
   /**
