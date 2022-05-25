@@ -16,7 +16,7 @@ public class Result<OkT, ErrT> {
       "Attempt to access error value on ok result";
 
   public static final String ERR_DIRECT_ACCESS_WHEN_NULL =
-      "Attempt to access null value via safe method. Consider using getOkOrNull / getErrOrNull.";
+      "Attempt to access null value via safe method. Consider using getOkOrNull / getErrOrNull";
 
   @Nullable
   private final OkT okValue;
@@ -42,15 +42,15 @@ public class Result<OkT, ErrT> {
   }
 
   public static <S, E> Result<S, E> err(@Nullable E errorValue) {
-    return new Result<>(null, errorValue, Type.ERROR);
+    return new Result<>(null, errorValue, Type.ERR);
   }
 
   public static <S, E> Result<S, E> err() {
-    return new Result<>(null, null, Type.ERROR);
+    return new Result<>(null, null, Type.ERR);
   }
 
   public boolean isErr() {
-    return type == Type.ERROR;
+    return type == Type.ERR;
   }
 
   public boolean isOk() {
@@ -80,12 +80,18 @@ public class Result<OkT, ErrT> {
 
   @Contract("!null -> !null; null -> _")
   public OkT getOkOrDefault(@Nullable final OkT value) {
-    return okValue != null ? okValue : value;
+    if (isOk()) {
+      return okValue != null ? okValue : value;
+    }
+    throw new IllegalStateException(ERR_OK_ACCESS_WHEN_ERR);
   }
 
   @Contract("!null -> !null; null -> _")
   public ErrT getErrOrDefault(@Nullable final ErrT value) {
-    return errValue != null ? errValue : value;
+    if (isErr()) {
+      return errValue != null ? errValue : value;
+    }
+    throw new IllegalStateException(ERR_ERR_ACCESS_WHEN_OK);
   }
 
   /**
@@ -95,10 +101,10 @@ public class Result<OkT, ErrT> {
    */
   @NotNull
   public OkT getOk() {
-    if (isOk()) {
-      return okValue != null ? okValue : (throw new IllegalStateException(ERR_DIRECT_ACCESS_WHEN_NULL));
+    if (isOk() && okValue != null) {
+      return okValue;
     }
-    throw new IllegalStateException(ERR_OK_ACCESS_WHEN_ERR);
+    throw new IllegalStateException(ERR_OK_ACCESS_WHEN_ERR + " or " + ERR_DIRECT_ACCESS_WHEN_NULL);
   }
 
   /**
@@ -108,10 +114,10 @@ public class Result<OkT, ErrT> {
    */
   @NotNull
   public ErrT getErr() {
-    if (isErr()) {
-      return errValue != null ? errValue : throw new IllegalStateException(ERR_DIRECT_ACCESS_WHEN_NULL);
+    if (isErr() && errValue != null) {
+      return errValue;
     } else {
-      throw new IllegalStateException(ERR_ERR_ACCESS_WHEN_OK);
+      throw new IllegalStateException(ERR_ERR_ACCESS_WHEN_OK + " or " + ERR_DIRECT_ACCESS_WHEN_NULL);
     }
   }
 
@@ -166,6 +172,6 @@ public class Result<OkT, ErrT> {
    * Describes the result type.
    */
   public enum Type {
-    OK, ERROR
+    OK, ERR
   }
 }
