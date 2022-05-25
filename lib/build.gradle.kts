@@ -11,8 +11,6 @@ publishing {
         maven {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/kkafar/result-type")
-            println(project.findProperty("gpr.user"))
-            println(System.getenv("GITHUB_USERNAME"))
             credentials {
                 username = (project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USERNAME"))
                 password = (project.findProperty("gpr.access_token") as String? ?: System.getenv("GITHUB_TOKEN"))
