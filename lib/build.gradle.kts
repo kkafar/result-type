@@ -1,10 +1,21 @@
+import org.gradle.initialization.Environment.Properties
+
 plugins {
     `java-library`
     `maven-publish`
 }
 
 group = "com.kkafara.rt"
-version = "1.0.2"
+version = "1.0.3"
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+fun getPropertyOrEnv(propName: String, envVarName: String?): String? {
+    return (project.findProperty(propName) as String? ?: System.getenv(envVarName))
+}
 
 publishing {
     repositories {
@@ -12,8 +23,16 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/kkafar/result-type")
             credentials {
-                username = (project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USERNAME"))
-                password = (project.findProperty("gpr.access_token") as String? ?: System.getenv("GITHUB_TOKEN"))
+                username = getPropertyOrEnv("gh.user", "GITHUB_USERNAME")
+                password = getPropertyOrEnv("gh.token", "GITHUB_TOKEN")
+            }
+        }
+        maven {
+            name = "JFrogBintray"
+            url = uri("https://kkafara.jfrog.io/artifactory/kkafara-gradle-release-local")
+            credentials {
+                username = getPropertyOrEnv("jfrog.user", "JFROG_USERNAME")
+                password = getPropertyOrEnv("jfrog.token", "JFROG_TOKEN")
             }
         }
     }

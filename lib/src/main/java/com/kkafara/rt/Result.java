@@ -20,13 +20,13 @@ import java.util.function.Consumer;
  */
 public class Result<OkT, ErrT> {
 
-  public static final String ERR_OK_ACCESS_WHEN_ERR =
+  private static final String ERR_OK_ACCESS_WHEN_ERR =
       "Attempt to access ok value on error result";
 
-  public static final String ERR_ERR_ACCESS_WHEN_OK =
+  private static final String ERR_ERR_ACCESS_WHEN_OK =
       "Attempt to access error value on ok result";
 
-  public static final String ERR_DIRECT_ACCESS_WHEN_NULL =
+  private static final String ERR_DIRECT_ACCESS_WHEN_NULL =
       "Attempt to access null value via safe method. Consider using getOkOrNull / getErrOrNull";
 
   @Nullable
@@ -286,6 +286,14 @@ public class Result<OkT, ErrT> {
    * Describes the result type.
    */
   public enum Type {
-    OK, ERR
+    /**
+     * Denotes success type.
+     */
+    OK,
+
+    /**
+     * Denotes error type.
+     */
+    ERR
   }
 }
